@@ -2,7 +2,7 @@ import Moment from "react-moment";
 import { Link } from "react-router-dom";
 import { MdLocationOn } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
-import { FaTrash } from "react-icons/fa6";
+import { FaTrash } from "react-icons/fa";
 
 export default function ListingItem({ listing, id, onDelete, onEdit }) {
   return (
