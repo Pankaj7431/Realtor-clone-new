@@ -8,31 +8,21 @@ import SwiperCore from "swiper";
 import "swiper/css/bundle";
 import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
 import { useNavigate } from "react-router";
-
 export default function Slider() {
   const [listings, setListings] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   SwiperCore.use([Autoplay, Navigation, Pagination]);
-
-  // Fetch data from Firestore when the component mounts
+  const navigate = useNavigate();
   useEffect(() => {
     async function fetchListings() {
       const listingsRef = collection(db, "listings");
-      const q = query(listingsRef, orderBy("timestamp", "desc"), limit(3));
+      const q = query(listingsRef, orderBy("timestamp", "desc"), limit(5));
       const querySnap = await getDocs(q);
-      var listings = [];
+      let listings = [];
       querySnap.forEach((doc) => {
         return listings.push({
           id: doc.id,
-          imgUrls: doc.data().imgUrls,
           data: doc.data(),
-          type: doc.data().type,
-          name: doc.data().name,
-          rent: doc.data().rent,
-          timestamp: doc.data().timestamp,
-          discountedPrice: doc.data().discountedPrice,
-          regularPrice: doc.data().regularPrice,
         });
       });
       setListings(listings);
@@ -55,40 +45,26 @@ export default function Slider() {
           pagination={{ type: "progressbar" }}
           effect="fade"
           modules={[EffectFade]}
-          autoplay={{ delay: 5000 }}
+          autoplay={{ delay: 3000 }}
         >
-          {listings.map((data, id) => (
+          {listings.map(({ data, id }) => (
             <SwiperSlide
               key={id}
-              onClick={() => navigate(`/${data.type}/${data.id}`)}
+              onClick={() => navigate(`/${data.type}/${id}`)}
             >
               <div
-                className="relative w-full h-[300px] overflow-hidden"
                 style={{
                   background: `url(${data.imgUrls[0]}) center, no-repeat`,
                   backgroundSize: "cover",
                 }}
+                className="relative w-full h-[300px] overflow-hidden"
               ></div>
-              <p
-                className="absolute text-[#f1faee] left-1 top-3 font-medium
-              max-w-[90%] bg-[#457b9d] px-2 py-1 rounded-br-2xl shadow-l 
-              transiton duration-150 ease-in-out opacity-90 "
-              >
+              <p className="text-[#f1faee] absolute left-1 top-3 font-medium max-w-[90%] bg-[#457b9d] shadow-lg opacity-90 p-2 rounded-br-3xl">
                 {data.name}
               </p>
-              <p
-                className="absolute text-[#f1faee] left-1 bottom-1 font-medium
-              max-w-[90%] bg-[#e63946] px-2 py-1 rounded-tr-2xl shadow-l 
-              transiton duration-150 ease-in-out opacity-90 space-x-2"
-              >
-                $
-                {data.discountedPrice
-                  .toString()
-                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",") ??
-                  data.regularPrice
-                    .toString()
-                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                {data.type === "rent" && " / Month"}
+              <p className="text-[#f1faee] absolute left-1 bottom-1 font-semibold max-w-[90%] bg-[#e63946] shadow-lg opacity-90 p-2 rounded-tr-3xl">
+                ${data.discountedPrice ?? data.regularPrice}
+                {data.type === "rent" && " / month"}
               </p>
             </SwiperSlide>
           ))}
